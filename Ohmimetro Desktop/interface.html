@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ohmímetro Desktop - Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Orbitron:wght@500;700&display=swap');
+
+        :root {
+            --bg-color: #0f172a; /* Slate 900 */
+            --card-bg: #1e293b; /* Slate 800 */
+            --text-primary: #f8fafc; /* Slate 50 */
+            --text-secondary: #94a3b8; /* Slate 400 */
+            --accent-color: #06b6d4; /* Cyan 500 */
+            --accent-hover: #0891b2; /* Cyan 600 */
+            --danger-color: #ef4444; /* Red 500 */
+            --success-color: #10b981; /* Emerald 500 */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 70%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(6, 182, 212, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+        }
+
+        header h1 {
+            margin-top: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 30px;
+            color: var(--text-primary);
+        }
+
+        .display-panel {
+            background: #020617; /* Very dark slate */
+            border-radius: 16px;
+            padding: 40px 20px;
+            margin-bottom: 40px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.02);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Subtle glowing effect behind the numbers */
+        .display-panel::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px;
+            height: 150px;
+            background: var(--accent-color);
+            filter: blur(80px);
+            opacity: 0.15;
+            z-index: 0;
+        }
+
+        .value-wrapper {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        .value-display {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .unit-display {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: #000;
+            box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);
+        }
+
+        .btn-primary:not(:disabled):hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-secondary:not(:disabled):hover {
+            background-color: rgba(239, 68, 68, 0.1); /* Slight red hover */
+            color: var(--danger-color);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .status-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--danger-color);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--danger-color);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .status-dot.connected {
+            background-color: var(--success-color);
+            box-shadow: 0 0 10px var(--success-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container { padding: 30px 20px; border-radius: 0; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+            .value-display { font-size: 3.5rem; }
+            .controls { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Ohmímetro Digital</h1>
+        </header>
+
+        <main>
+            <div class="display-panel">
+                <div class="value-wrapper">
+                    <div class="value-display" id="resistorValue">---</div>
+                    <div class="unit-display" id="resistorUnit">Ω</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="connectBtn" class="btn btn-primary">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                    Conectar Porta
+                </button>
+                <button id="disconnectBtn" class="btn btn-secondary" disabled>Desconectar</button>
+            </div>
+
+            <div class="status-panel">
+                <div class="status-dot" id="statusIndicator"></div>
+                <span id="statusText">Aguardando conexão (9600 baud)...</span>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let port;
+        let reader;
+        let keepReading = true;
+        let readIntervalId = null;
+        let lastReceivedTime = 0;
+
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const statusText = document.getElementById('statusText');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const resistorValue = document.getElementById('resistorValue');
+        const resistorUnit = document.getElementById('resistorUnit');
+
+        // Check if browser supports Web Serial API
+        if (!("serial" in navigator)) {
+            statusText.innerText = "Web Serial API não suportada. Use Chrome ou Edge.";
+            statusText.style.color = "var(--danger-color)";
+            connectBtn.disabled = true;
+        }
+
+        connectBtn.addEventListener('click', async () => {
+            try {
+                // Request serial port from the user
+                port = await navigator.serial.requestPort();
+                
+                // Open the serial port at 9600 baud (matching Arduino setup)
+                await port.open({ baudRate: 9600 });
+                
+                // Update interface
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+                statusText.innerText = "Conectado. Lendo medições...";
+                statusIndicator.classList.add('connected');
+                
+                keepReading = true;
+                
+                // Start a watchdog to check if we are receiving data
+                monitorDataTimeout();
+                
+                // Start the reading loop
+                readLoop();
+                
+            } catch (error) {
+                console.error("Erro na conexão:", error);
+                statusText.innerText = "Conexão cancelada ou falhou.";
+            }
+        });
+
+        disconnectBtn.addEventListener('click', async () => {
+            await fecharConexao();
+        });
+
+        async function fecharConexao() {
+            keepReading = false;
+            
+            if (reader) {
+                try {
+                    await reader.cancel();
+                } catch(e) {}
+            }
+            
+            if (port) {
+                try {
+                    await port.close();
+                } catch(e) {}
+            }
+            
+            clearInterval(readIntervalId);
+            
+            // Revert interface
+            connectBtn.disabled = false;
+            disconnectBtn.disabled = true;
+            statusText.innerText = "Desconectado.";
+            statusIndicator.classList.remove('connected');
+            
+            setDesconectadoVisual()
+        }
+
+        // Watchdog interval to detect "Circuito Aberto" or disconnected wires
+        // Arduino code stops printing to Serial when Vin is low or circuit is open
+        function monitorDataTimeout() {
+            if(readIntervalId) clearInterval(readIntervalId);
+            
+            readIntervalId = setInterval(() => {
+                if(!keepReading) return;
+                
+                const agora = Date.now();
+                // If more than 2 seconds without data (Arduino delays are 600ms + analogRead time)
+                if (agora - lastReceivedTime > 2000) {
+                    setDesconectadoVisual();
+                    if(statusText.innerText === "Conectado. Lendo medições...") {
+                        statusText.innerText = "Conectado. Sem leitura (Circuito Aberto?)";
+                    }
+                }
+            }, 1000);
+        }
+
+        function setDesconectadoVisual() {
+            resistorValue.innerText = "---";
+            resistorUnit.innerText = "Ω";
+            resistorValue.style.color = "var(--text-secondary)";
+        }
+
+        async function readLoop() {
+            while (port.readable && keepReading) {
+                const textDecoder = new TextDecoderStream();
+                const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+                reader = textDecoder.readable.getReader();
+
+                let partialData = "";
+
+                try {
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) {
+                            // reader canceled
+                            break;
+                        }
+                        
+                        if (value) {
+                            partialData += value;
+                            let lines = partialData.split('\n');
+                            
+                            // Last element is either empty string or incomplete line
+                            partialData = lines.pop(); // save incomplete part for next loop
+                            
+                            for (let line of lines) {
+                                processLine(line.trim());
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error("Erro fatal de leitura:", error);
+                    // Handle physical disconnection of the device
+                    await fecharConexao();
+                    statusText.innerText = "Dispositivo desconectado abrúptamente.";
+                } finally {
+                    reader.releaseLock();
+                }
+            }
+        }
+
+        function processLine(line) {
+            if (!line) return;
+            
+            // Expected Format: "ADC In: 1023    ADC Out: 512    Resistência: 1000.00"
+            if (line.includes("Resistência:")) {
+                lastReceivedTime = Date.now(); // Update watchdog timer
+                
+                // Extract value after "Resistência:"
+                const partes = line.split("Resistência:");
+                if (partes.length > 1) {
+                    const valorStr = partes[1].trim();
+                    const resistencia = parseFloat(valorStr);
+                    
+                    if (!isNaN(resistencia)) {
+                        atualizarVisor(resistencia);
+                        statusText.innerText = "Medindo...";
+                    }
+                }
+            }
+        }
+
+        function atualizarVisor(valor) {
+            resistorValue.style.color = "var(--accent-color)";
+            
+            if (valor >= 1000) {
+                resistorValue.innerText = (valor / 1000).toFixed(2);
+                resistorUnit.innerText = "kΩ";
+            } else {
+                resistorValue.innerText = Math.round(valor * 10) / 10; // 1 decimal place
+                resistorUnit.innerText = "Ω";
+            }
+        }
+    </script>
+</body>
+</html>
