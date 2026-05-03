@@ -1,0 +1,19 @@
+/*
+ * Exemplo Didático: Medindo a duração de um pulso
+ * Canal Eletrônica e Tecnologia
+ */
+
+const int xSensor = 8; // Pino que receberá o pulso
+unsigned long xTempo; //variável para guardar a duração do pulso
+
+void setup()
+    {
+      Serial.begin(9600);
+      pinMode(xSensor, INPUT);
+    }
+
+void loop()
+    {
+      duracao = pulseIn(xSensor, HIGH);
+      Serial.println(xTempo);
+    }

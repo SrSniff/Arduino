@@ -1,0 +1,41 @@
+/*********************************************************************
+ * Frequencímetro em Arduino                                      *
+ * Canal Eletrônica e Tecnologia
+ *********************************************************************/
+#include <LiquidCrystal.h>
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2); 
+ 
+// Variaveis
+float xTempo;
+float xFrequencia;
+const int xSensor = 8;
+
+void setup()
+{
+  // Initializa o LCD
+  lcd.begin(16, 2);
+  lcd.clear();
+  lcd.setCursor(2, 0);
+  lcd.print("Frequencia: ");
+   
+  pinMode(xSensor, INPUT); // Configurar pino de entrada
+}
+ 
+void loop() 
+{
+   xTempo = 0;
+   xFrequencia = 0;
+   
+   xTempo = pulseIn(xSensor, HIGH);
+   // Calculo da frequencia
+   xFrequencia = (1 / (xTempo * 2 * 0.000001)) * 1.055;
+   
+   lcd.clear();
+   lcd.setCursor(0,0);
+   lcd.print("Frequencia: ");
+   lcd.setCursor(0,2);
+   lcd.print(xFrequencia);
+   lcd.setCursor(5,2);
+   lcd.print (" Hz");
+   delay(100);
+}
