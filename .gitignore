@@ -1,0 +1,1 @@
+(analizador-espectro uses Arduino IDE which generates no build artifacts in version control, and the changes are only source/config files)
