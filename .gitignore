@@ -1,1 +1,65 @@
-(analizador-espectro uses Arduino IDE which generates no build artifacts in version control, and the changes are only source/config files)
+```
+# Arduino build artifacts
+*.hex
+*.elf
+*.bin
+*.map
+*.d
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+
+# Arduino IDE
+build/
+Build/
+build-*/*/
+core/*
+libraries/*/build/
+
+# PlatformIO
+.piolibdeps/
+.platformio/
+
+# General build artifacts
+*.out
+*.obj
+*.i
+*.s
+
+# Dependencies
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.egg-info/
+dist/
+build/
+target/
+.gradle/
+.mypy_cache/
+.pytest_cache/
+coverage/
+htmlcov/
+.coverage
+
+# Environment files
+.env
+.env.local
+.env.*
+
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+```
